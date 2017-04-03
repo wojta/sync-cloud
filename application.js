@@ -5,6 +5,13 @@ var mbaasApi = require('fh-mbaas-api-metrics');
 var mbaasExpress = mbaasApi.mbaasExpress();
 var cpuCount = require('os').cpus().length;
 
+if (process.env.SYNC_MONGODB_URL) {
+  process.env.FH_MONGODB_CONN_URL = process.env.SYNC_MONGODB_URL;
+}
+if (process.env.SYNC_REDIS_HOST) {
+  process.env.FH_REDIS_HOST = process.env.SYNC_REDIS_HOST;
+}
+
 if (cluster.isMaster && process.env.SHOULD_SCALE === 'true') {
   // Scale to defined number of workers, or just the amount of cores
   var clusterSize = process.env.WORKER_COUNT || cpuCount;

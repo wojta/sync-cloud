@@ -6,7 +6,7 @@
     "cors": "~2.2.0",
     "express": "~4.0.0",
     "fh-mbaas-api": "7.0.0-1",
-    "fh-mbaas-api-metrics": "wei-lee/fh-mbaas-api-1#FH-3433-test",
+    "fh-mbaas-api-metrics": "wei-lee/fh-mbaas-api-1#FH-3435-add-new-app",
     "mongodb": "^2.1.18",
     "request": "2.34.0"
   },
