@@ -2,7 +2,7 @@ var cluster = require('cluster');
 var express = require('express');
 var bodyParser = require('body-parser');
 
-var mbaasApi = require('fh-mbaas-api-metrics');
+var mbaasApi = require('fh-mbaas-api');
 var mbaasExpress = mbaasApi.mbaasExpress();
 var cpuCount = require('os').cpus().length;
 
