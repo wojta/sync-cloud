@@ -28,6 +28,7 @@ if (cluster.isMaster && process.env.SHOULD_SCALE === 'true') {
     } else {
       var diff = heapDiff.end();
       console.log('heapdiff = ', diff);
+      heapDiff = null;
     }
   });
 
