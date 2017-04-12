@@ -6,8 +6,6 @@ var mbaasApi = require('fh-mbaas-api');
 var mbaasExpress = mbaasApi.mbaasExpress();
 var cpuCount = require('os').cpus().length;
 
-var memwatch = require('memwatch-next');
-
 if (cluster.isMaster && process.env.SHOULD_SCALE === 'true') {
   // Scale to defined number of workers, or just the amount of cores
   var clusterSize = process.env.WORKER_COUNT || cpuCount;
@@ -17,22 +15,6 @@ if (cluster.isMaster && process.env.SHOULD_SCALE === 'true') {
     cluster.fork(Object.assign({}, process.env, { metricsId: 'worker-' + (i + 1) }));
   }
 } else {
-
-  var heapDiff = null;
-
-  memwatch.on('leak', function(info) {
-    console.error('mem leak deteced', info);
-    if (!heapDiff) {
-      heapDiff = new memwatch.HeapDiff();
-      console.log('Start taking heapdiff');
-    } else {
-      var diff = heapDiff.end();
-      console.log('heapdiff = ', diff);
-      heapDiff = null;
-    }
-  });
-
-
   // Define custom sync handlers and interceptors
   require('./lib/sync.js');
 
