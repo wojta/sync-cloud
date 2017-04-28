@@ -1,6 +1,8 @@
 var express = require('express');
 var mbaasApi = require('fh-mbaas-api');
 var mbaasExpress = mbaasApi.mbaasExpress();
+var memwatch = require('memwatch');
+
 
 // Define custom sync handlers and interceptors
 require('./lib/sync.js');
@@ -25,5 +27,16 @@ app.use(mbaasExpress.errorHandler());
 var port = process.env.FH_PORT || process.env.OPENSHIFT_NODEJS_PORT || 8001;
 var host = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
 var server = app.listen(port, host, function() {
-  console.log("App started at: " + new Date() + " on port: " + port); 
+  console.log("App started at: " + new Date() + " on port: " + port);
+});
+
+memwatch.on('leak', function(info) {
+  console.error("memwatch leak: " + info.reason);
+});
+
+
+var hd = new memwatch.HeapDiff();
+memwatch.on('stats', function(stats) {
+  var diff = hd.end();
+  console.error(JSON.stringify(diff, null, 2));
 });
