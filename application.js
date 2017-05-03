@@ -1,7 +1,7 @@
 var cluster = require('cluster');
 var express = require('express');
 var bodyParser = require('body-parser');
-
+var memwatch = require('memwatch-next');
 var mbaasApi = require('fh-mbaas-api');
 var mbaasExpress = mbaasApi.mbaasExpress();
 var cpuCount = require('os').cpus().length;
@@ -10,9 +10,9 @@ if (cluster.isMaster && process.env.SHOULD_SCALE === 'true') {
   // Scale to defined number of workers, or just the amount of cores
   var clusterSize = process.env.WORKER_COUNT || cpuCount;
 
-  for(var i = 0; i < clusterSize; i++) {
+  for (var i = 0; i < clusterSize; i++) {
     console.log('Starting worker ' + (i + 1) + ' with CPU count of ' + cpuCount);
-    cluster.fork(Object.assign({}, process.env, { metricsId: 'worker-' + (i + 1) }));
+    cluster.fork(Object.assign({}, process.env, {metricsId: 'worker-' + (i + 1)}));
   }
 } else {
   // Define custom sync handlers and interceptors
@@ -33,7 +33,7 @@ if (cluster.isMaster && process.env.SHOULD_SCALE === 'true') {
   // Add extra routes here
   app.post('/collection/reset', bodyParser.json({limit: '1mb'}), require('./lib/collection').reset);
   app.post('/collection/seed', bodyParser.json({limit: '100mb'}), require('./lib/collection').seed);
-  app.post('/sync/all', bodyParser.json({ limit: '100mb' }), require('./lib/test').allSync);
+  app.post('/sync/all', bodyParser.json({limit: '100mb'}), require('./lib/test').allSync);
 
   // Important that this is last!
   app.use(mbaasExpress.errorHandler());
@@ -42,5 +42,17 @@ if (cluster.isMaster && process.env.SHOULD_SCALE === 'true') {
   var host = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
   var server = app.listen(port, host, function() {
     console.log("App started at: " + new Date() + " on port: " + port);
+  });
+
+  memwatch.on('leak', function(info) {
+    console.error("[memwatch] leak: " + info.reason);
+  });
+
+
+  var hd = new memwatch.HeapDiff();
+  memwatch.on('stats', function(stats) {
+    var diff = hd.end();
+    console.error("[memwatch] " + JSON.stringify(diff, null, 0));
+    hd = new memwatch.HeapDiff();
   });
 }
